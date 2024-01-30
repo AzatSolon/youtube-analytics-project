@@ -1,9 +1,10 @@
 from googleapiclient.discovery import build
 from dotenv import load_dotenv
+from pprint import pprint
 
 import os
 
-load_dotenv()
+load_dotenv('../.env')
 
 
 class Channel:
@@ -18,4 +19,4 @@ class Channel:
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
         channel = self.youtube.channels().list(id=self.channel_id, part='snippet,statistics').execute()
-        print(channel)
+        pprint(channel)
