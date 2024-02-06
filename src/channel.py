@@ -52,4 +52,5 @@ class Channel:
     @classmethod
     def get_serves(cls):
         """класс-метод get_service(), возвращающий объект для работы с YouTube API"""
-        return cls.__youtube
+        youtube = build('youtube', 'v3', developerKey=api_key)
+        return youtube
