@@ -1,56 +1,80 @@
-import json
-
-from googleapiclient.discovery import build
-from dotenv import load_dotenv
-from pprint import pprint
-
 import os
-
-load_dotenv('../.env')
-api_key: str = os.getenv('YT_API_KEY')
+import json
+from googleapiclient.discovery import build
+from pprint import pprint
 
 
 class Channel:
     """Класс для ютуб-канала"""
-    __youtube = build("youtube", "v3", developerKey=api_key)
 
     def __init__(self, channel_id: str) -> None:
         """Экземпляр инициализируется id канала. Дальше все данные будут подтягиваться по API."""
         self.__channel_id = channel_id
-        self.channel = self.__youtube.channels().list(id=self.__channel_id, part='snippet,statistics').execute()
+        self.youtube = self.get_service().channels().list(id=self.channel_id, part='snippet,statistics').execute()
+        self.title = self.youtube["items"][0]["snippet"]["title"]
+        self.description = self.youtube["items"][0]["snippet"]["description"]
+        self.url = self.youtube["items"][0]["snippet"]["thumbnails"]["high"]["url"]
+        self.subscriber_count = self.youtube["items"][0]["statistics"]["subscriberCount"]
+        self.video_count = self.youtube["items"][0]["statistics"]["videoCount"]
+        self.view_count = self.youtube["items"][0]["statistics"]["viewCount"]
+        self.data = {"title": self.title, "description": self.description, "url": self.url,
+                     "subscriber_count": self.subscriber_count, "video_count": self.video_count,
+                     "view_count": self.view_count}
 
     def print_info(self) -> None:
         """Выводит в консоль информацию о канале."""
-        pprint(self.channel)
+        pprint(json.dumps(self.youtube))
 
-    def to_json(self, item):
-        """Функция сохраняющая в файл значения атрибутов экземпляра Channel"""
-        date = json.dumps(self.channel)
-        with open(item, 'w', encoding="utf-8") as file:
-            file.write(date)
+    @classmethod
+    def get_service(cls):
+        """
+         класс-метод ,
+         возвращающий объект для работы с YouTube API
+        """
+        api_key: str = os.getenv('YT_API_KEY')
+        youtube = build('youtube', 'v3', developerKey=api_key)
+        return youtube
 
     @property
     def channel_id(self):
-        """Воввращает id  канала"""
         return self.__channel_id
 
-    @property
-    def title(self):
-        """возвращает название  канала"""
-        return f"{self.channel['items'][0]['snippet']['title']}"
+    @channel_id.setter
+    def channel_id(self, channel_id):
+        self.__channel_id = channel_id
 
-    @property
-    def video_count(self):
-        """Возвращает количество видео"""
-        return f"{self.channel['items'][0]['statistics']['videoCount']}"
+    def to_json(self, filename) -> None:
+        """
+         метод, сохраняющий в файл значения
+         атрибутов экземпляра `Channel`
+        """
+        with open(filename, "w") as file:
+            json.dump(self.youtube, file, indent=2, ensure_ascii=False)
 
-    @property
-    def url(self):
-        """Возвращает ссылку на канал"""
-        return f"{self.channel['items'][0]['snippet']['thumbnails']['default']['url']}"
+    def __str__(self):
+        return f'{self.title}, {self.url}'
 
-    @classmethod
-    def get_serves(cls):
-        """класс-метод get_service(), возвращающий объект для работы с YouTube API"""
-        youtube = build('youtube', 'v3', developerKey=api_key)
-        return youtube
+    def __add__(self, other):
+        return self.subscriber_count + other.subscriber_count
+
+    def __sub__(self, other):
+        return int(self.subscriber_count) - int(other.subscriber_count)
+
+    def __rsub__(self, other):
+        result_3 = self.subscriber_count - other.subscriber_count
+        return result_3
+
+    def __gt__(self, other):
+        return self.subscriber_count > other.subscriber_count
+
+    def __ge__(self, other):
+        return self.subscriber_count >= other.subscriber_count
+
+    def __lt__(self, other):
+        return self.subscriber_count < other.subscriber_count
+
+    def __le__(self, other):
+        return self.subscriber_count <= other.subscriber_count
+
+    def __eq__(self, other):
+        return self.subscriber_count == other.subscriber_count
