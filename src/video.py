@@ -29,6 +29,13 @@ class Video:
             self.view_count = None
             self.like_count = None
 
+    def __repr__(self):
+        return (f"id-{self.video_id}\n"
+                f"url-{self.video_url}\n"
+                f"title-{self.title}\n"
+                f"view-{self.view_count}\n"
+                f"like-{self.like_count}")
+
     def __str__(self):
         return f"{self.title}"
 
