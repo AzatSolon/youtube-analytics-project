@@ -61,8 +61,8 @@ class Channel:
         return int(self.subscriber_count) - int(other.subscriber_count)
 
     def __rsub__(self, other):
-        result_3 = self.subscriber_count - other.subscriber_count
-        return result_3
+        result = self.subscriber_count - other.subscriber_count
+        return result
 
     def __gt__(self, other):
         return self.subscriber_count > other.subscriber_count
